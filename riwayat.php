@@ -7,8 +7,6 @@ require_once __DIR__ . '/php/auth.php';
 requireLogin();
 
 $pdo = getDB();
-// BUG 6: Query mengambil semua pesanan — tidak difilter berdasarkan user_id
-// sehingga pelanggan bisa melihat pesanan milik user lain
 $pesananList = $pdo->query("SELECT p.*, u.name AS pelanggan FROM pesanan p JOIN users u ON p.user_id = u.id ORDER BY p.created_at DESC")->fetchAll();
 
 $statusLabel = [

@@ -58,5 +58,8 @@ function initDatabase(PDO $pdo): void {
         ];
         $stmt = $pdo->prepare("INSERT INTO menu (nama, deskripsi, harga, kategori) VALUES (?,?,?,?)");
         foreach ($menu as $m) $stmt->execute($m);
+
+        $pdo->exec("INSERT INTO menu (nama, deskripsi, harga, kategori, tersedia) VALUES ('Soto Ayam', 'Soto ayam dengan kuah bening', 12000, 'Makanan', 0)");
+        $pdo->exec("INSERT INTO menu (nama, deskripsi, harga, kategori, tersedia) VALUES ('Es Kelapa', 'Es kelapa muda segar', 8000, 'Minuman', 0)");
     }
 }

@@ -24,17 +24,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    // BUG 3: Tidak ada validasi bahwa validItems tidak kosong sebelum INSERT
     // Pesanan kosong tetap bisa disimpan ke database
 
     $ids = implode(',', array_keys($validItems) ?: [0]);
     $menuData = $pdo->query("SELECT * FROM menu WHERE id IN ($ids) AND tersedia = 1")->fetchAll();
 
-    // BUG 4: Total dihitung salah — jumlah item tidak dikalikan harga
-    // sehingga total selalu hanya menjumlah harga satuan saja
     $total = 0;
     foreach ($menuData as $m) {
-        $total += $m['harga']; // seharusnya $m['harga'] * $validItems[$m['id']]
+        $total += $m['harga'];
     }
 
     $pdo->beginTransaction();
@@ -48,7 +45,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     $pdo->commit();
 
-    // BUG 5: Flash message tidak menyertakan total yang benar
     // (karena total sudah salah di atas) — user melihat total yang tidak sesuai
     $_SESSION['flash'] = ['type'=>'success', 'msg'=>"Pesanan #$pesananId berhasil dibuat!"];
     header('Location: riwayat.php');

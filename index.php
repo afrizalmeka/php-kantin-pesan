@@ -6,7 +6,6 @@ initDatabase(getDB());
 require_once __DIR__ . '/php/auth.php';
 
 $pdo = getDB();
-// BUG 2: Menampilkan menu yang tidak tersedia (tersedia=0) ikut ditampilkan
 // karena filter WHERE tersedia=1 dihilangkan
 $menuList = $pdo->query("SELECT * FROM menu ORDER BY kategori, nama")->fetchAll();
 
