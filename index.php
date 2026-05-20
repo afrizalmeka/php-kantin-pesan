@@ -19,6 +19,7 @@ if ($kategori != '') {
 
     $stmt->execute([$kategori]);
     $menuList = $stmt->fetchAll();
+    //fix bug no 5
 } else {
     $menuList = $pdo->query(
         "SELECT * FROM menu
