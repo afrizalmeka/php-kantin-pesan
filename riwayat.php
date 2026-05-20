@@ -7,7 +7,16 @@ require_once __DIR__ . '/php/auth.php';
 requireLogin();
 
 $pdo = getDB();
-$pesananList = $pdo->query("SELECT p.*, u.name AS pelanggan FROM pesanan p JOIN users u ON p.user_id = u.id ORDER BY p.created_at DESC")->fetchAll();
+$stmt = $pdo->prepare(
+    "SELECT p.*, u.name AS pelanggan
+     FROM pesanan p
+     JOIN users u ON p.user_id = u.id
+     WHERE p.user_id = ?
+     ORDER BY p.created_at DESC"
+);
+//fix bug no 3
+$stmt->execute([$_SESSION['user_id']]);
+$pesananList = $stmt->fetchAll();
 
 $statusLabel = [
     'pending'    => ['label'=>'Menunggu',  'class'=>'badge-warning'],

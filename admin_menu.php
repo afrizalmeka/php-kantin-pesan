@@ -38,6 +38,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $id = (int)($_POST['id'] ?? 0);
         $pdo->prepare("UPDATE menu SET tersedia = 0 WHERE id = ?")->execute([$id]);
         $msg = 'Menu dinonaktifkan.';
+    } elseif ($act === 'activate') {
+        $id = (int)($_POST['id'] ?? 0);
+        $pdo->prepare("UPDATE menu SET tersedia = 1 WHERE id = ?")->execute([$id]);
+        $msg = 'Menu berhasil diaktifkan.';
     }
 }
 
@@ -99,7 +103,18 @@ include __DIR__ . '/php/header.php';
                     <form method="post" onsubmit="return confirm('Nonaktifkan menu ini?')">
                         <input type="hidden" name="action" value="delete">
                         <input type="hidden" name="id" value="<?= $m['id'] ?>">
-                        <button type="submit" class="btn btn-danger btn-sm">Nonaktifkan</button>
+                        <button type="submit" class="btn btn-danger btn-sm">
+                            Nonaktifkan
+                        </button>
+                    </form>
+
+                    <?php else: ?>
+                    <form method="post">
+                        <input type="hidden" name="action" value="activate">
+                        <input type="hidden" name="id" value="<?= $m['id'] ?>">
+                        <button type="submit" class="btn btn-success btn-sm">
+                            Aktifkan
+                        </button>
                     </form>
                     <?php endif; ?>
                 </td>
