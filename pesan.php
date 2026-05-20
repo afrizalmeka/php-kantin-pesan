@@ -26,29 +26,57 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // Pesanan kosong tetap bisa disimpan ke database
 
-    $ids = implode(',', array_keys($validItems) ?: [0]);
-    $menuData = $pdo->query("SELECT * FROM menu WHERE id IN ($ids) AND tersedia = 1")->fetchAll();
-
-    $total = 0;
-    foreach ($menuData as $m) {
-        $total += $m['harga'];
+    if (empty($validItems)) {
+        $error = "Pilih minimal satu menu.";
+    } else {
+    
+        $ids = implode(',', array_keys($validItems));
+        $menuData = $pdo->query(
+            "SELECT * FROM menu WHERE id IN ($ids) AND tersedia = 1"
+        )->fetchAll();
+    
+        $total = 0;
+        foreach ($menuData as $m) {
+            $total += $m['harga'];
+        }
+    
+        $pdo->beginTransaction();
+    
+        $pdo->prepare(
+            "INSERT INTO pesanan (user_id,total_harga,catatan)
+            VALUES (?,?,?)"
+        )->execute([
+            $_SESSION['user_id'],
+            $total,
+            $catatan ?: null
+        ]);
+    
+        $pesananId = $pdo->lastInsertId();
+    
+        foreach ($menuData as $m) {
+            $pdo->prepare(
+                "INSERT INTO pesanan_item
+                (pesanan_id,menu_id,jumlah,harga)
+                VALUES (?,?,?,?)"
+            )->execute([
+                $pesananId,
+                $m['id'],
+                $validItems[$m['id']],
+                $m['harga']
+            ]);
+        }
+    
+        $pdo->commit();
+    
+        $_SESSION['flash'] = [
+            'type'=>'success',
+            'msg'=>"Pesanan #$pesananId berhasil dibuat!"
+        ];
+    
+        header('Location: riwayat.php');
+        exit;
     }
-
-    $pdo->beginTransaction();
-    $pdo->prepare("INSERT INTO pesanan (user_id, total_harga, catatan) VALUES (?,?,?)")
-        ->execute([$_SESSION['user_id'], $total, $catatan ?: null]);
-    $pesananId = $pdo->lastInsertId();
-
-    foreach ($menuData as $m) {
-        $pdo->prepare("INSERT INTO pesanan_item (pesanan_id, menu_id, jumlah, harga) VALUES (?,?,?,?)")
-            ->execute([$pesananId, $m['id'], $validItems[$m['id']] ?? 1, $m['harga']]);
-    }
-    $pdo->commit();
-
-    // (karena total sudah salah di atas) — user melihat total yang tidak sesuai
-    $_SESSION['flash'] = ['type'=>'success', 'msg'=>"Pesanan #$pesananId berhasil dibuat!"];
-    header('Location: riwayat.php');
-    exit;
+   
 }
 
 $menuList = $pdo->query("SELECT * FROM menu WHERE tersedia = 1 ORDER BY kategori, nama")->fetchAll();
