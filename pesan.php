@@ -37,7 +37,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
         $total = 0;
         foreach ($menuData as $m) {
-            $total += $m['harga'];
+        $qty = $validItems[$m['id']];
+        $subtotal = $m['harga'] * $qty;
+        $total += $subtotal;
         }
     
         $pdo->beginTransaction();
